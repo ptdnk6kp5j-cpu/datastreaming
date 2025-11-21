@@ -1,0 +1,32 @@
+.DS_Store
+.vscode/
+.idea/
+.env
+*.log
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*.swo
+.venv/
+venv/
+coverage/
+pytest_cache/
+
+# Docker
+docker-compose.override.yml
+
+# dbt target and compiled artifacts
+/dbt/target/
+/dbt/logs/
+
+# macOS
+*.DS_Store
+
+# JetBrains
+*.iml
+
+# local shell history
+.history
