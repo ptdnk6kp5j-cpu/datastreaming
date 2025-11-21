@@ -207,13 +207,20 @@ Expected: `oracle/database:19.3.0-ee`
 
 # 5. Deploying the Full Stack
 
-### 5.1 Clone this Repo
+## 5.1 Clone this Repo
 
 Click the **“Code”** button at the top of this page to copy the correct clone URL.
 
----
 
-### 5.2 Start the stack
+## 5.2 Build the dbt Image
+
+Build the dbt image, navigate to the directory containing your `docker-compose.yml` file and run:
+
+```bash
+docker compose build dbt
+
+
+## 5.3 Start the stack
 
 ```
 docker compose up -d
