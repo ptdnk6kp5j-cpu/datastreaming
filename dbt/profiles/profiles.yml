@@ -1,0 +1,14 @@
+tfsdwh:
+  target: dev
+  outputs:
+    dev:
+      type: oracle
+      host: dwh
+      port: 1521
+      user: DWH_DBT_USER
+      password: "{{ env_var('DWH_DBT_USER_PASSWORD') }}"
+      service: DWHPDB1
+      database: DWHPDB1
+      protocol: tcp
+      threads: 4
+      schema: DWH

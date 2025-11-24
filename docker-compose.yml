@@ -1,0 +1,163 @@
+# ------------------------------------------------------------------------------------
+# WHAT THIS COMPOSE FILE DEPLOYS
+#
+# Running this file starts a complete local data-streaming environment:
+#   • SOR  – Oracle 19c Source database (CDB + PDB + bootstrap scripts)
+#   • DWH  – Oracle 19c Data Warehouse (CDB + PDB + DV layers + bootstrap scripts)
+#   • OGG  – Oracle GoldenGate 23 Microservices (UI on ports 18080 / 18443)
+#   • dbt  – dbt-core environment with Oracle adapter for transformation pipelines
+#
+# Both Oracle databases automatically run all bootstrap SQL and shell scripts on
+# first startup, creating CDB/PDB structures, admin users, GoldenGate users,
+# TIPLUS schemas, Data Vault layers, and dbt users based on the values in `.env`.
+#
+# HOW TO RUN (INITIAL STARTUP)
+#
+#   1. Create your local .env file:
+#        cp .env.example .env
+#
+#   2. Fill in required variables (passwords, paths, etc.)
+#
+#   3. Start the full environment:
+#        docker compose up -d
+#
+#   4. Monitor first-time Oracle initialization:
+#        docker logs -f sor
+#        docker logs -f dwh
+#
+# After initialization:
+#   • GoldenGate UI:  http://localhost:18080  /  https://localhost:18443
+#   • dbt container:  docker exec -it dbt bash
+#   • Oracle SQLPlus: docker exec -it sor sqlplus / as sysdba
+# ------------------------------------------------------------------------------------
+
+name: datastreaming
+
+networks:
+  oggnet: {}
+
+volumes:
+  sor-data:
+  dwh-data:
+  ogg-u01-ogg-scripts:
+  ogg-u02:
+  ogg-u03:
+  dbt-project:
+
+services:
+  # -----------------------------
+  # Source DB (SOR) - Oracle 19c
+  # -----------------------------
+  sor:
+    image: oracle/database:19.3.0-ee
+    container_name: sor
+    environment:
+      SERVICE_NAME: "SOR"
+      # oracle specific environment variables
+      ORACLE_PWD: "${SOR_ORACLE_ADMIN_PASSWORD}"
+      ORACLE_SID: "SORCDB"
+      ORACLE_PDB: "SORPDB1"
+      # additional OGG users
+      SOR_OGG_ADMIN_PASSWORD: "${SOR_OGG_ADMIN_PASSWORD}"
+      SOR_ROOT_OGGADMIN_PASSWORD: "${SOR_ROOT_OGGADMIN_PASSWORD}"
+      # app users for TIPLUS integration
+      SOR_TIZONE1_OWNER_PASSWORD: "${SOR_TIZONE1_OWNER_PASSWORD}"
+      SOR_TIZONE2_OWNER_PASSWORD: "${SOR_TIZONE2_OWNER_PASSWORD}"
+    ports:
+      - "1521:1521"
+    volumes:
+      # Persistent database files
+      - sor-data:/opt/oracle/oradata
+      # Startup scripts auto-run at first boot of the DB
+      - ./database/shared/setup:/opt/oracle/scripts/setup:ro
+      - ./database/shared/startup:/opt/oracle/scripts/startup:ro
+      - ./database/shared/ops:/opt/oracle/scripts/ops:ro
+      - ./database/sor/deployment:/opt/oracle/scripts/deployment:ro
+    networks: [oggnet]
+    restart: unless-stopped
+
+  # -----------------------------
+  # Target DB (DWH) - Oracle 19c
+  # -----------------------------
+  dwh:
+    image: oracle/database:19.3.0-ee
+    container_name: dwh
+    environment:
+      SERVICE_NAME: "DWH"
+      # oracle specific environment variables
+      ORACLE_PWD: "${DWH_ORACLE_ADMIN_PASSWORD}"
+      ORACLE_SID: "DWHCDB"
+      ORACLE_PDB: "DWHPDB1"
+      # additional OGG users
+      DWH_OGG_ADMIN_PASSWORD: "${DWH_OGG_ADMIN_PASSWORD}"
+      # datavault app users
+      DWH_LANDING_TIPLUS_AS_PASSWORD: "${DWH_LANDING_TIPLUS_AS_PASSWORD}"
+      DWH_LANDING_TIPLUS_EU_PASSWORD: "${DWH_LANDING_TIPLUS_EU_PASSWORD}"
+      DWH_STAGE_TIPLUS_AS_PASSWORD: "${DWH_STAGE_TIPLUS_AS_PASSWORD}"
+      DWH_STAGE_TIPLUS_EU_PASSWORD: "${DWH_STAGE_TIPLUS_EU_PASSWORD}"
+      DWH_RAW_VAULT_PASSWORD: "${DWH_RAW_VAULT_PASSWORD}"
+      DWH_BUSINESS_VAULT_PASSWORD: "${DWH_BUSINESS_VAULT_PASSWORD}"
+      DWH_ANALYTICS_PASSWORD: "${DWH_ANALYTICS_PASSWORD}"
+      # dbt user
+      DWH_DBT_USER_PASSWORD: "${DWH_DBT_USER_PASSWORD}"
+    ports:
+      - "1522:1521"
+    volumes:
+      - dwh-data:/opt/oracle/oradata
+      - ./database/shared/setup:/opt/oracle/scripts/setup:ro
+      - ./database/shared/startup:/opt/oracle/scripts/startup:ro
+      - ./database/shared/ops:/opt/oracle/scripts/ops:ro
+      - ./database/dwh/deployment:/opt/oracle/scripts/deployment:ro
+    networks: [oggnet]
+    restart: unless-stopped
+
+  # --------------------------------------
+  # Oracle GoldenGate 23 (Microservices)
+  # --------------------------------------
+  ogg23:
+    image: oracle/goldengate:23.4
+    container_name: ogg23
+    platform: linux/amd64
+    depends_on:
+      - sor
+      - dwh
+    ports:
+      - "18080:80"
+      - "18443:443"
+    environment:
+      OGG_ADMIN: "oggadmin"
+      OGG_ADMIN_PWD: "${OGG_ADMIN_PASSWORD}"
+      OGG_DEPLOYMENT: "Local"
+    networks: [oggnet]
+    restart: unless-stopped
+    volumes:
+      - ogg-u01-ogg-scripts:/u01/ogg/scripts
+      - ogg-u02:/u02
+      - ogg-u03:/u03
+      # Optional: mount a local folder with helper scripts/response files
+      # - ./ogg23:/ogg:ro
+    # command: ["/bin/bash", "-lc", "/ogg/entrypoint.sh"]
+
+  # --------------------------------------
+  # dbt container (dbt-core + Oracle adapter)
+  # --------------------------------------
+  dbt:
+    build: ./dbt
+    container_name: dbt
+    platform: linux/amd64
+    depends_on:
+      - dwh
+    ports:
+      - "8080:8080"
+    environment:
+      DBT_PROFILES_DIR: /root/.dbt
+      DWH_DBT_USER_PASSWORD: "${DWH_DBT_USER_PASSWORD}"
+      TZ: Europe/Amsterdam
+    volumes:
+      - ./dbt:/usr/app/dbt
+      - ./dbt/profiles:/root/.dbt
+    working_dir: /usr/app/dbt
+    networks: [oggnet]
+    stdin_open: true
+    tty: true
+    entrypoint: ["/bin/bash", "-c", "tail -f /dev/null"]   # <— keeps container active
