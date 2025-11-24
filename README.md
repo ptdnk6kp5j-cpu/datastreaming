@@ -207,17 +207,20 @@ Expected: `oracle/database:19.3.0-ee`
 
 # 5. Deploying the Full Stack
 
-### 5.1 Clone the P01683 Repository
+## 5.1 Clone this Repo
 
-```
-git clone https://INGCDaaS@dev.azure.com/INGCDaaS/IngOne/_git/P01683-tfsods
-```
+Click the **“Code”** button at the top of this page to copy the correct clone URL.
 
-Checkout:
 
-`feature/docker_ogg_db_datastreaming`
+## 5.2 Build the dbt Image
 
-### 5.2 Start the stack
+Build the dbt image, navigate to the directory containing your `docker-compose.yml` file and run:
+
+```bash
+docker compose build dbt
+
+
+## 5.3 Start the stack
 
 ```
 docker compose up -d
