@@ -12,7 +12,7 @@ It is designed for **local development**, **proof-of-concepts**, **training**, a
 
 ---
 
-# 1. Directory Structure
+# 1 Directory Structure
 
 ```
 datastreaming/
@@ -63,9 +63,9 @@ datastreaming/
 
 ---
 
-# 2. Services & Architecture
+# 2 Services & Architecture
 
-### **2.1. SOR – Source Oracle 19c**
+### **2.1 SOR – Source Oracle 19c**
 - **Container name:** `sor`
 - **Image:** `oracle/database:19.3.0-ee`
 - **CDB/PDB:** `SORCDB / SORPDB1`
@@ -83,7 +83,7 @@ datastreaming/
 
 ---
 
-### **2.2. DWH – Data Warehouse Oracle 19c**
+### **2.2 DWH – Data Warehouse Oracle 19c**
 - **Container name:** `dwh`
 - **Image:** `oracle/database:19.3.0-ee`
 - **CDB/PDB:** `DWHCDB / DWHPDB1`
@@ -100,7 +100,7 @@ datastreaming/
 
 ---
 
-### **2.3. GoldenGate 23 Microservices**
+### **2.3 GoldenGate 23 Microservices**
 - **Service name:** `ogg23`
 - **Image:** `oracle/goldengate:23.4`
 - **Ports:**
@@ -110,7 +110,7 @@ datastreaming/
 
 ---
 
-### **2.4. dbt (tfsdwh)**
+### **2.4 dbt (tfsdwh)**
 - Connects to DWH `DWHPDB1`
 - Uses `DWH_DBT_USER`
 - Layers:
@@ -121,21 +121,21 @@ datastreaming/
 
 ---
 
-# 3. Prerequisites
+# 3 Prerequisites
 
-### **3.1. Required software**
+### **3.1 Required software**
 - Docker Desktop
 - Git
 - Bash shell
 - Oracle account (for downloading binaries)
 
-### **3.2. Recommended Docker Desktop resources**
+### **3.2 Recommended Docker Desktop resources**
 - CPUs: **6–12**
 - Memory: **8–16 GB**
 - Swap: **1–4 GB**
 - Disk: **50+ GB free**
 
-### **3.3. CPU architecture check**
+### **3.3 CPU architecture check**
 
 #### Windows
 ```
@@ -154,15 +154,19 @@ Output meaning:
 
 ---
 
-# 4. Building Required Images
+# 4 Building Required Images
 
-## 4.1. Clone Oracle Docker Repository
+## 4.1 Clone this Repo
+
+Clone this repo.
+
+## 4.2 Clone Oracle Docker Repository
 
 ```
 git clone https://github.com/oracle/docker-images.git
 ```
 
-## 4.2. Download GoldenGate Binaries
+## 4.3 Download GoldenGate Binaries
 
 Place ZIP (do not unzip) in:
 
@@ -170,7 +174,7 @@ Place ZIP (do not unzip) in:
 docker-images/OracleGoldenGate/23/
 ```
 
-## 4.3 ARM only – Download Oracle 19c ARM Build
+## 4.4 ARM only – Download Oracle 19c ARM Build
 Place ZIP into:
 
 ```
@@ -179,7 +183,7 @@ docker-images/OracleDatabase/SingleInstance/dockerfiles/19.3.0/
 
 ---
 
-## 4.4. Build GoldenGate Image
+## 4.5 Build GoldenGate Image
 
 ### AMD64:
 ```
@@ -195,7 +199,7 @@ Expected: `oracle/goldengate:23.4`
 
 ---
 
-## 4.5. Build Oracle 19c Database Image
+## 4.6 Build Oracle 19c Database Image
 
 ```
 buildContainerImage.sh -v 19.3.0 -e
@@ -205,22 +209,28 @@ Expected: `oracle/database:19.3.0-ee`
 
 ---
 
-# 5. Deploying the Full Stack
-
-## 5.1 Clone this Repo
-
-Click the **“Code”** button at the top of this page to copy the correct clone URL.
-
-
-## 5.2 Build the dbt Image
+## 4.7 Build DBT Image
 
 Build the dbt image, navigate to the directory containing your `docker-compose.yml` file and run:
 
-```bash
+```
 docker compose build dbt
+```
 
+## 4.8 Configure Passwords
 
-## 5.3 Start the stack
+You will find a `.env example` file in the root folder of this project. Use this file as a template for setting up all the passwords used in this docker data streaming project.
+
+1. Do **NOT** place real passwords directly in file `.env example` but copy the file to `.env`. 
+2. Fill in this `.env` file with your own values.
+
+The `.env` file is ignored by Git and is used by Docker Compose to inject variables into the Oracle, GoldenGate, and dbt containers. Each service receives only the variables explicitly defined under its `environment:` section.
+
+---
+
+# 5. Deploying the Full Stack
+
+## 5.1 Start the stack
 
 ```
 docker compose up -d
@@ -243,7 +253,7 @@ DATABASE IS READY TO USE!
 
 # 6. Runtime Operations
 
-## 6.1. Using the interactive menu
+## 6.1 Using the interactive menu
 
 Inside container:
 
@@ -262,7 +272,7 @@ The same exists inside the SOR container.
 
 ---
 
-## 6.2. Connecting to Oracle
+## 6.2 Connecting to Oracle
 
 ### Host:
 - SOR → localhost:1521 / SORPDB1  
@@ -276,7 +286,7 @@ docker exec -it dwh sqlplus / as sysdba
 
 ---
 
-## 6.3. Running dbt
+## 6.3 Running dbt
 
 ```
 docker exec -it dbt bash
@@ -287,7 +297,7 @@ dbt test
 
 ---
 
-# 7. Conventions
+# 7 Conventions
 
 ### SQL Naming
 - `create_*_users.sql`
@@ -311,6 +321,6 @@ database/shared/ops/
 
 ---
 
-# 8. License
+# 8 License
 
 This project is licensed under the **MIT License**.
