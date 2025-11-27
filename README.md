@@ -202,7 +202,7 @@ Expected: `oracle/goldengate:23.4`
 ## 4.6 Build Oracle 19c Database Image
 
 ```
-buildContainerImage.sh -v 19.3.0 -e
+./buildContainerImage.sh -v 19.3.0 -e
 ```
 
 Expected: `oracle/database:19.3.0-ee`
