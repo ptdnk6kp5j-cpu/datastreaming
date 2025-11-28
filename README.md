@@ -231,6 +231,7 @@ The `.env` file is ignored by Git and is used by Docker Compose to inject variab
 # 5. Deploying the Full Stack
 
 ## 5.1 Start the stack
+The command docker compose up -d is used to create and start all the services defined in the docker-compose.yml file, running them in the background. 
 
 ```
 docker compose up -d

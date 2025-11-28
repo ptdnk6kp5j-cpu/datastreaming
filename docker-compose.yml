@@ -43,6 +43,7 @@ volumes:
   ogg-u02:
   ogg-u03:
   dbt-project:
+  liquibase-data:
 
 services:
   # -----------------------------
@@ -161,3 +162,25 @@ services:
     stdin_open: true
     tty: true
     entrypoint: ["/bin/bash", "-c", "tail -f /dev/null"]   # <— keeps container active
+
+  #--------------------------------------
+  # Liquibase Database Migration Tool
+  # --------------------------------------
+  liquibase:
+    image: liquibase/liquibase:latest
+    container_name: liquibase_installer
+    platform: linux/amd64 # Recommended for stability on M3
+    depends_on:
+      - dwh # Ensures DWH is started before this container
+    networks: [oggnet]
+    volumes:
+      # Mount the dedicated persistent volume managed by Docker
+      - liquibase-data:/liquibase/changelog
+      # Mount the specific local JDBC driver file into the lib directory. Change the local path accordingly.
+      - /Users/Shared/ojdbc17.jar:/liquibase/lib/ojdbc17.jar
+    environment:
+      # These variables facilitate easy manual runs or future automation
+      LIQUIBASE_COMMAND_URL: "jdbc:oracle:thin:@//dwh:1521/DWHPDB1" 
+      LIQUIBASE_COMMAND_USERNAME: "${LIQUIBASE_USERNAME}"
+      LIQUIBASE_COMMAND_PASSWORD: "${LIQUIBASE_PASSWORD}" # Reads password from your .env file
+    entrypoint: ["tail", "-f", "/dev/null"]
