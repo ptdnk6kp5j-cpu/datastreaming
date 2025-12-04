@@ -19,8 +19,11 @@ pytest_cache/
 docker-compose.override.yml
 
 # dbt target and compiled artifacts
+/dbt/dbt_packages/
 /dbt/target/
 /dbt/logs/
+/dbt/package-lock.yml
+/dbt/profiles/.user.yml
 
 # macOS
 *.DS_Store

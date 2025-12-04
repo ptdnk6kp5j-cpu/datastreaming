@@ -160,4 +160,4 @@ services:
     networks: [oggnet]
     stdin_open: true
     tty: true
-    entrypoint: ["/bin/bash", "-c", "tail -f /dev/null"]   # <— keeps container active
+    entrypoint: ["/usr/app/dbt/entrypoint.sh"]
