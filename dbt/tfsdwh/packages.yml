@@ -1,0 +1,4 @@
+# packages.yml for 1.10.x setup
+packages:
+  - package: ScalefreeCOM/datavault4dbt
+    version: "1.12.4" 

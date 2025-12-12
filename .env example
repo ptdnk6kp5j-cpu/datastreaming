@@ -46,8 +46,7 @@ DWH_LANDING_TIPLUS_EU_PASSWORD=
 # DWH – Stage Layer (Pre-Raw-Vault normalization)
 ##############################################
 
-DWH_STAGE_TIPLUS_AS_PASSWORD=
-DWH_STAGE_TIPLUS_EU_PASSWORD=
+DWH_STAGE_TIPLUS_PASSWORD=
 
 
 ##############################################
@@ -69,6 +68,12 @@ DWH_BUSINESS_VAULT_PASSWORD=
 ##############################################
 
 DWH_ANALYTICS_PASSWORD=
+
+
+##############################################
+# DWH – Control Layer
+##############################################
+DWH_CONTROL_PASSWORD=
 
 
 ##############################################

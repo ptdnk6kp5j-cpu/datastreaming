@@ -81,3 +81,23 @@ CREATE TABLE DWH_LANDING_TIPLUS_EU.MASTER (
 );
 
 PROMPT === Landing TIPLUS table creation complete ===
+
+CREATE TABLE DWH_CONTROL.ELT_HWM(
+    DW_SOURCE_SYSTEM VARCHAR2(50 CHAR),
+    SRC_SCN      NUMBER,
+    LAST_LOAD_DATE TIMESTAMP(6),
+    PRIMARY KEY (SOURCE_SYSTEM, ZONE)
+);
+
+
+DWH_STAGING_MASTER
+HK(KEY | ZONE) PK HUB
+HK(   REFNO_MBE               CHAR(8 CHAR),
+    REFNO_PFIX              CHAR(3 CHAR),
+    REFNO_BRN               CHAR(8 CHAR),
+    MASTER_REF              CHAR(20 CHAR),
+    STATUS                  CHAR(4 CHAR),
+    AMOUNT                  NUMBER(15,0),)
+Clean ' ' to NULL
+Revmove duplicates
+Clean up error

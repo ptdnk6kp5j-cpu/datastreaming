@@ -3,8 +3,9 @@
 # Exit immediately if a command exits with a non-zero status.
 set -e
 
-echo "Running dbt deps..."
-# The working directory is already set to /usr/app/dbt
+echo "Running dbt deps for project tfsdwh..."
+# Install project dependencies
+cd /usr/app/dbt/tfsdwh
 dbt deps
 
 echo "Starting container main process..."

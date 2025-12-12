@@ -214,7 +214,7 @@ Expected: `oracle/database:19.3.0-ee`
 Build the dbt image, navigate to the directory containing your `docker-compose.yml` file and run:
 
 ```
-docker compose build dbt
+docker compose build --no-cache dbt
 ```
 
 ## 4.8 Configure Passwords
