@@ -16,47 +16,11 @@ It is designed for **local development**, **proof-of-concepts**, **training**, a
 
 ```
 datastreaming/
-├── database/
-│   ├── shared/
-│   │   ├── ops/
-│   │   │   ├── env.sh
-│   │   │   ├── menu.sh
-│   │   │   ├── common functions...
-│   │   └── (shared logic used by SOR & DWH)
-│   │
-│   ├── sor/
-│   │   ├── deployment/
-│   │   │   ├── shell/
-│   │   │   │   ├── bootstrap.sh
-│   │   │   │   ├── initialize.sh
-│   │   │   │   ├── reset.sh
-│   │   │   ├── sql/
-│   │   │   │   ├── setup_ogg.sql
-│   │   │   │   ├── create_tizone_users.sql
-│   │   │   │   ├── create_tizone_tables.sql
-│   │   │   │   ├── drop_tizone_users.sql
-│   │   │   │   ├── drop_tizone_tables.sql
-│   │
-│   ├── dwh/
-│   │   ├── deployment/
-│   │   │   ├── shell/
-│   │   │   │   ├── bootstrap.sh
-│   │   │   │   ├── initialize.sh
-│   │   │   │   ├── reset.sh
-│   │   │   ├── sql/
-│   │   │   │   ├── create_dwh_users.sql
-│   │   │   │   ├── create_dwh_tables.sql
-│   │   │   │   ├── drop_dwh_users.sql
-│   │   │   │   ├── drop_dwh_tables.sql
-│
-├── ogg/
-│   └── config, service deployment files...
-│
-├── dbt/
-│   ├── profiles/
-│   ├── models/
-│   └── Dockerfile
-│
+├── database
+│   ├── sor
+│   ├── dwh
+├── goldengate
+├── dbt
 ├── docker-compose.yml
 ├── .env example
 ```
@@ -89,14 +53,10 @@ datastreaming/
 - **CDB/PDB:** `DWHCDB / DWHPDB1`
 
 **Schemas created (create_dwh_users.sql)**
-- Landing: `DWH_LANDING_TIPLUS_AS`, `DWH_LANDING_TIPLUS_EU`
-- Stage: `DWH_STAGE_TIPLUS_AS`, `DWH_STAGE_TIPLUS_EU`
-- Vault: `DWH_RAW_VAULT`, `DWH_BUSINESS_VAULT`
-- Analytics: `DWH_ANALYTICS`
-- dbt: `DWH_DBT_USER`
+- `all schemas under create_dwh_users.sql`
 
 **Tables created (create_dwh_tables.sql)**  
-- `BASEEVENT`, `MASTER` in each landing schema
+- `all tables under create_dwh_tables.sql`
 
 ---
 
@@ -106,7 +66,7 @@ datastreaming/
 - **Ports:**
   - http://localhost:18080
   - https://localhost:18443
-- **Admin user:** `oggadmin / ${OGG_ADMIN_PASSWORD}`
+- **Admin user:** `oggadmin / ogg`
 
 ---
 
@@ -217,14 +177,16 @@ Build the dbt image, navigate to the directory containing your `docker-compose.y
 docker compose build --no-cache dbt
 ```
 
-## 4.8 Configure Passwords
+## 4.8 Passwords
 
-You will find a `.env example` file in the root folder of this project. Use this file as a template for setting up all the passwords used in this docker data streaming project.
+For this POC the following passwords are used
 
-1. Do **NOT** place real passwords directly in file `.env example` but copy the file to `.env`. 
-2. Fill in this `.env` file with your own values.
-
-The `.env` file is ignored by Git and is used by Docker Compose to inject variables into the Oracle, GoldenGate, and dbt containers. Each service receives only the variables explicitly defined under its `environment:` section.
+```
+Oracle SYS / SYSTEM : tfsdwh_POC1
+OGG users           : tfsdwh_POC1
+Application schemas : tfsdwh_POC1
+dbt user            : tfsdwh_POC1.
+```
 
 ---
 

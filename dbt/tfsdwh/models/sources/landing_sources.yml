@@ -1,0 +1,33 @@
+version: 2
+
+sources:
+
+  # =========================================================
+  # LANDING – TIPLUS AS
+  # =========================================================
+  - name: landing_tiplus_as
+    database: dwhpdb1
+    schema: DWH_TIPLUS_AS_LANDING
+    description: >
+      Landing schema for TIPLUS source system - Asia region.
+      Contains raw CDC data ingested via Oracle GoldenGate.
+    tables:
+      - name: master_cdc
+        description: CDC landing table for MASTER (AS)
+      - name: baseevent_cdc
+        description: CDC landing table for BASEEVENT (AS)
+
+  # =========================================================
+  # LANDING – TIPLUS EU
+  # =========================================================
+  - name: landing_tiplus_eu
+    database: dwhpdb1
+    schema: DWH_TIPLUS_EU_LANDING
+    description: >
+      Landing schema for TIPLUS source system - Europe region.
+      Contains raw CDC data ingested via Oracle GoldenGate.
+    tables:
+      - name: master_cdc
+        description: CDC landing table for MASTER (EU)
+      - name: baseevent_cdc
+        description: CDC landing table for BASEEVENT (EU)

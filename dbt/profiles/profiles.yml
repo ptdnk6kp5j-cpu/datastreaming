@@ -5,8 +5,8 @@ tfsdwh:
       type: oracle
       host: dwh
       port: 1521
-      user: DWH_DBT_USER
-      password: "{{ env_var('DWH_DBT_USER_PASSWORD') }}"
+      user: DWH_TIPLUS_DBT
+      password: tfsdwh_POC1
       service: DWHPDB1
       database: DWHPDB1
       protocol: tcp
