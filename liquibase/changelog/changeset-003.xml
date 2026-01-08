@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- 1. Create 5 tables -->
+    <changeSet id="1" author="Paritosh">
+        <createTable tableName="employee">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="first_name" type="varchar(50)"/>
+            <column name="last_name" type="varchar(50)"/>
+            <column name="department_id" type="int"/>
+        </createTable>
+        <createTable tableName="department">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)"/>
+        </createTable>
+        <createTable tableName="project">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="project_name" type="varchar(100)"/>
+        </createTable>
+        <createTable tableName="timesheet">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="employee_id" type="int"/>
+            <column name="hours_logged" type="decimal(5,2)"/>
+        </createTable>
+        <createTable tableName="payroll">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="employee_id" type="int"/>
+            <column name="salary" type="decimal(10,2)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- 2. Alter one table (add a column to 'employee') -->
+    <changeSet id="2" author="Paritosh">
+        <addColumn tableName="employee">
+            <column name="email" type="varchar(100)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 3. Drop a table ('payroll' is no longer needed in this schema) -->
+    <changeSet id="3" author="Paritosh">
+        <dropTable tableName="payroll"/>
+    </changeSet>
+
+    <!-- 4. Create a view (to see employee details with department names) -->
+    <changeSet id="4" author="Paritosh">
+        <createView viewName="employee_department_vw" replaceIfExists="true">
+            SELECT e.first_name, e.last_name, e.email, d.name as department_name
+            FROM employee e
+            JOIN department d ON e.department_id = d.id
+        </createView>
+    </changeSet>
+
+    <!-- 5. Grant select on a table to "DWH_DBT_USER" -->
+    <!-- Note: Using raw SQL for grants is often necessary as Liquibase generic tags for grants can be database-specific -->
+    <changeSet id="5" author="Paritosh">
+        <sql>
+            GRANT SELECT ON employee_department_vw TO DWH_DBT_USER;
+        </sql>
+        <rollback>
+            REVOKE SELECT ON employee_department_vw FROM DWH_DBT_USER;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
